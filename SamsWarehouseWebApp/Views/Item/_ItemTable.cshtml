@@ -1,0 +1,43 @@
+﻿@model IEnumerable<SamsWarehouseWebApp.Models.Data.Item>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.ItemId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ItemName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Unit)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UnitPrice)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ItemId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ItemName)
+                </td>
+                <th>
+                    @Html.DisplayFor(model => item.Unit)
+                </th>
+                <th>
+                    $@Html.DisplayFor(model => item.UnitPrice)
+                </th>
+                <td>
+                    <input type="button" class="btn btn-outline-warning" value="★" onclick="addToShoppingList(@item.ItemId)" />
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

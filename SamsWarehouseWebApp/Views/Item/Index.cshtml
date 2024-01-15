@@ -1,0 +1,148 @@
+﻿@model IEnumerable<SamsWarehouseWebApp.Models.Data.Item>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Products</h1>
+
+<div id="ItemTableContainer">
+    <partial name="_ItemTable.cshtml" />
+</div>
+
+
+<div class="modal" style="color:black" id="ItemModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Modal title</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="ModalBody">
+                <p>Modal body text goes here.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .smaller-input {
+        width: 50px;
+    }
+
+    .input-group {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+    }
+
+        .input-group label {
+            margin-right: 10px;
+        }
+</style>
+
+<div class="modal fade" id="addItemToListModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" style="color: black;">Add Product To List</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <form id="addItemToListForm">
+                    <div class="row justify-content-evenly">
+                        <div class="col-6" id="ddlContainer">
+                            <select class="form-select" disabled>
+                                <option>Loading.....</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <div class="input-group">
+                                <label style="color: black;">Quantity:</label>
+                                <input type="number" name="Quantity" class="smaller-input" value="1" min="1" max="99" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-3">
+                            <input type="submit" value="Add Item" class="btn btn-success mt-3" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // Adds an event listener to add item to list modal form to allow add to list function
+
+    window.addEventListener('load', (e) => {
+        document.getElementById('addItemToListForm').addEventListener('submit', async (e) => {
+            handleAddItemToList(e);
+        })
+    })
+
+    // Prepares and displays modal to add item to list
+    async function addToShoppingList(itemId) {
+        sessionStorage.setItem('selectedItemId', itemId);
+        console.log(itemId);
+
+        $("#addItemToListModal").modal("show");
+
+        let result = await fetch('/List/ShoppingListDDL');
+        let htmlResult = await result.text();
+        document.getElementById("ddlContainer").innerHTML = htmlResult;
+    }
+    // Adds items to list 
+    async function handleAddItemToList(e) {
+        e.preventDefault();
+
+        // Retrieves ItemId from session
+        let itemId = sessionStorage.getItem('selectedItemId');
+        // Retrieves ListId from shopping list
+        let listID = e.target["shoppingList"].selectedOptions[0].value
+
+        if (listID == 0) {
+            return;
+        }
+
+        let listItem =
+        {
+            ListId: listID,
+            ItemId: itemId,
+            Quantity: e.target["Quantity"].value
+        }
+
+        console.log(listItem);
+
+        // Executes fetch request to add item to list from controller
+        let result = await fetch("/List/AddItemToList", {
+            method: "PUT",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(listItem)
+        });
+        // Hides the add item to list modal if successful 
+        if (result.ok) {
+            $("#addItemToListModal").modal("hide");
+        }
+        // Hides modal, sends modal message to user displaying that they have already added item to list
+        else if (!result.ok) {
+            $("#addItemToListModal").modal("hide");
+            alert("You have already added this item to this list");
+        }   
+    }
+</script>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

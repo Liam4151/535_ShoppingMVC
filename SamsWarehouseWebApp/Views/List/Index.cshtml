@@ -1,0 +1,190 @@
+﻿<div style="min-height: 65vh">
+
+    <div class="text-center m-2 mb-4">
+        <h2>Shopping List</h2>
+    </div>
+
+    <div class="card shadow py-2">
+        <div class="row m-0 justify-content-evenly">
+            <div class="col-sm-2 p-1">
+                <input type="button" class="btn btn-primary w-100" value="Add List" onclick="$('#createListModal').modal('show')" />
+            </div>
+            <div class="col-sm-6 p-1" id="selectContainer">
+                <select class="form-select" disabled>
+                    <option>Loading.....</option>
+                </select>
+            </div>
+            <div class="col-sm-2 p-1">
+                <input type="button" class="btn btn-danger w-100" value="Delete List" onclick="deleteConfirm()" />
+            </div>
+        </div>
+    </div>
+
+    <div class="p-2">
+        <div class="card shadow" id="itemContainer" style="min-height: 40vh">
+
+        </div>
+    </div>
+
+</div>
+
+<div class="modal fade" id="createListModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+
+                <h5 class="modal-title" style="color: black" >Create List</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+
+                <form id="createListForm">
+                    <input type="text" name="listName" class="form-control" required min="1" max="50"/>
+                    <input type="submit" value="Add List" class="btn btn-success mt-3" />
+                </form>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="invalidListName" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New List</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="ModalBody">
+                <label> List Name must have at a minimum of 1 character and maximum of 50.</label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    // Adds an event listener to create list modal form to allow add list function
+    window.addEventListener('load', async (e) => {
+        updateDDL();
+                
+        document.getElementById("createListForm").addEventListener('submit', async (e) => {
+            // Executes create list function to create a list
+            await handleCreateList(e);
+        })
+        // Adds an event listener to the delete list modal to allow lists to be deleted
+        document.getElementById("deleteListForm").addEventListener('submit', async (e) => {
+            // Executes delete list function
+            await deleteConfirm();
+        })
+    });
+    // Creates a list using the POST List Controller method "AddNewList". 
+       async function handleCreateList(e) {
+        e.preventDefault();
+        console.log(e.target["listName"].value);
+        
+        // Result uses fetch request to execute "AddNewList" controller method
+        let result = await fetch('/List/AddNewList', {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(e.target["listName"].value)
+        });
+        // If result is success, execute updateDDL function to display the created list in the drop-down list
+        if (result.ok) {
+            await updateDDL();
+            $('#createListModal').modal('hide');
+        }
+        // ADDED
+        else if (!result.ok) {
+            $('#createListModal').modal('hide');
+            $("#invalidListName").modal("show");
+            }    
+    }
+    // Updates the drop-down list that displays all user lists to be selected
+    async function updateDDL(){
+        let result = await fetch('/List/ShoppingListDDL');
+        let htmlResult = await result.text();
+        document.getElementById('selectContainer').innerHTML = htmlResult;
+
+            
+        // Retrieves the DDL container (selectContainer), selects the list using querySelector and adds event listener 
+        // to execute handleDDLChange(e) function
+        let ddlContainer = document.getElementById('selectContainer');
+        let ddl = ddlContainer.querySelector('select');
+        ddl.addEventListener('change', async (e) => {
+            handleDDLChange(e);
+        })
+
+        // ADDED
+        let selectedOption = ddl.selectedOptions[0]
+        console.log("List ID: " + selectedOption.value + " listName: " + selectedOption.text)
+        sessionStorage.setItem('listID', selectedOption.value)
+        sessionStorage.setItem('listName', selectedOption.text)
+
+
+
+    }
+
+    // Updates the list items based on the list selected in the Drop-Down List 
+    async function handleDDLChange(e){
+        // Sets the retrieved listID and listName to item.
+        let selectedOption = e.target.selectedOptions[0]
+        sessionStorage.setItem('listID', selectedOption.value)
+        sessionStorage.setItem('listName', selectedOption.text)
+        console.log("List ID: " + selectedOption.value + " listName: " + selectedOption.text)
+
+        // Sends fetch request to list controller which retrieves all items for the selected list
+        let result = await fetch('/List/GetItemsForList?listID=' + selectedOption.value);
+        let htmlResult = await result.text();
+        document.getElementById('itemContainer').innerHTML = htmlResult
+    }
+
+    // Removes the selected item from the selected list
+    async function removeItem(itemId) {
+        // Retrieves listId from sessionStorage
+        let listID = sessionStorage.getItem("listID");
+
+        let listItem = {
+            ListId: listID,
+            ItemId: itemId
+        }
+        // Sends fetch request to remove item from list 
+        let result = await fetch('/List/RemoveItemFromList', {
+            method: 'DELETE',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(listItem)
+        });
+        if (result.ok) {
+            // Update Item Table
+
+            let result = await fetch('/List/GetItemsForList?listID=' + listID);
+            let htmlResult = await result.text();
+            document.getElementById('itemContainer').innerHTML = htmlResult
+        }
+
+        console.log(listItem);
+    }
+
+    // Deletes selected list in the DDL
+    async function deleteConfirm(){
+        let listID = sessionStorage.getItem("listID");
+        // Sends fetch request to delete selected shopping list in DDL
+        let result = await fetch('/List/DeleteShoppingList', {
+            method: 'DELETE',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(listID)
+        });
+        // If success, updates the DDL
+        if (result.ok) {
+            await updateDDL();
+        }
+    }
+
+
+</script>

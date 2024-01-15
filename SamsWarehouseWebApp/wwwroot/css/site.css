@@ -1,0 +1,67 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+.rotateAnimation {
+    animation: rotation 3s infinite linear;
+}
+
+@keyframes rotation {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(359deg);
+    }
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+    margin-bottom: 60px;
+    background: linear-gradient(-45deg, #b8cdf8,#145c9e);
+    /*    background: linear-gradient(-45deg, #23a6d5,#e73c7e,#ee7752,#23d5ab); */
+    background-size: 400% 400% !important;
+    animation: gradient 15s ease infinite !important;
+    height: 100vh !important;
+}
+
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0%, 50%;
+    }
+}
+
+.color-primary-0 { color: var(--colour-0) !important }
+.color-primary-1 { color: var(--colour-1) !important }
+.color-primary-2 { color: var(--colour-2) !important }
+
+.bg-color-primary-0 { color: var(--colour-0) !important }
+.bg-color-primary-1 { color: var(--colour-1) !important }
+.bg-color-primary-2 { color: var(--colour-2) !important }
+
+/*.border-bg-color-primary-0 { color: #b8cdf8 }
+.border-bg-color-primary-1 { color: #0b4f6c }
+.border-color-primary-2 { color: #145c9e }*/
+
+.register-color1 { color: #145c9e }
+
+.register-color { color: #ffffff }
+
+
+

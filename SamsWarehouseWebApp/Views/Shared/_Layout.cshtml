@@ -1,0 +1,142 @@
+﻿@{
+    string? theme = Context?.Session.GetString("theme");
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SamsWarehouseWebApp</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/SamsWarehouseWebApp.styles.css" asp-append-version="true" />
+@*    <link rel="stylesheet" href="~/css/LightTheme.css" id="themeStyle" />
+*@
+
+    @if (Context.Request.Cookies.Any(a => a.Key == "theme"))
+    {
+        if (Context?.Request?.Cookies?["theme"].ToString() == "dark")
+        {
+            <link rel="stylesheet" href="~/css/DarkTheme.css" id="themeStyle" />
+        }
+        else
+        {
+            <link rel="stylesheet" href="~/css/LightTheme.css" id="themeStyle" />
+        }
+    }
+    else
+    {
+        <link rel="stylesheet" href="~/css/LightTheme.css" id="themeStyle" />
+
+    }
+
+</head>
+
+<style>
+    .small-input {
+        width: 100px;
+    }
+
+</style>
+
+<body style="background-color: var(--colour-0); color: var(--text-colour) !important" >
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light box-shadow mb-3" style="background-color: var(--colour-1)">
+            <img src="/Elements/Sams Warehouse Shopping Cart.svg" height="75" width="75" class="me-1" id="cartIcon" />
+            <div class="container-fluid">
+                <a class="navbar-brand" style="color: white" asp-area="" asp-controller="Home" asp-action="AboutUs">Sams Warehouse</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link" style="color: white !important" asp-area="" asp-controller="Home" asp-action="AboutUs">About Us</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" style="color: white !important" asp-area="" asp-controller="Item" asp-action="Index">Products</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" style="color: white !important" asp-area="" asp-controller="List" asp-action="Index">Shopping Lists</a>
+                        </li>
+                    </ul>
+
+                    @if (!String.IsNullOrWhiteSpace(Context?.Session?.GetString("Email")))
+                    {
+                        <div class="me-3" style="color: white">@Context.Session.GetString("Email")</div>
+                        <a asp-controller="Home" asp-action="Logout" class="btn btn-warning me-3 white-text" >Logout</a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Home" asp-action="Login" class="btn btn-success me-3 white-text" >Login</a>
+                        <a asp-controller="Home" asp-action="Register" class="btn btn-warning me-3">Register</a>
+                    }
+                    <input type="button" value="Switch Theme" class="btn btn-primary" id="btnSwitchTheme" onclick="switchTheme()" />
+
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2023 - SamsWarehouseWebApp - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+
+        function switchTheme()
+        {
+            let themeCurrent = localStorage.getItem("theme");
+
+            if(themeCurrent && themeCurrent == "dark")
+            {
+                localStorage.setItem("theme","light");
+                document.cookie = "theme=lght;path=/";
+                document.getElementById("themeStyle").setAttribute("href","/css/LightTheme.css")
+            }
+            else
+            {
+                localStorage.setItem("theme","dark");
+                document.cookie = "theme=dark;path=/";
+                document.getElementById("themeStyle").setAttribute("href","/css/DarkTheme.css")
+            }
+        }
+
+        let cartIcon = document.getElementById('cartIcon');
+        cartIcon.addEventListener('mouseenter', startSpin)
+        cartIcon.addEventListener('mouseleave', stopSpin)
+
+        let spinningIcons = document.getElementsByClassName('material-icons');
+
+        for (index in spinningIcons) {
+            spinningIcons[index].addEventListener('mouseenter', startSpin)
+            spinningIcons[index].addEventListener('mouseleave', stopSpin)
+        }
+
+        function startSpin(e) {
+            let element = e.target;
+            element.classList.add("rotateAnimation")
+        }
+
+        function stopSpin(e) {
+            let element = e.target;
+            element.classList.remove("rotateAnimation")
+        }
+    </script>
+
+</body>
+</html>

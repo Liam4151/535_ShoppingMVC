@@ -1,0 +1,53 @@
+﻿@model IEnumerable<SamsWarehouseWebApp.Models.Data.ListItems>
+
+@ViewBag.CreatedDate
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Item.ItemId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Item.ItemName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Item.Unit)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Item.UnitPrice)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Quantity)
+            </th>
+            <th style="min-width:20vw"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Item.ItemId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Item.ItemName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Item.Unit)
+                </td>
+                <td>
+                    $@Html.DisplayFor(modelItem => item.Item.UnitPrice)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Quantity)
+                </td>
+                <td class="d-flex justify-content-around">
+                    <input type="button" class="btn btn-outline-danger" value="Remove" onclick="removeItem(@item.Item.ItemId)" />
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<b> Sub Total: </b>
+$@Model.Sum(item => item.Item.UnitPrice * item.Quantity)
